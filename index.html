@@ -1,119 +1,666 @@
-```markdown
-# Infografía Interactiva de Lista — Experiencias de Madres
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infografía Interactiva — Experiencias de Madres</title>
+<style>
+/* ============================================
+   VARIABLES Y RESET GLOBAL
+   ============================================ */
+:root {
+  --color-primario: #1F3A5F;
+  --color-secundario: #4E8098;
+  --color-fondo: #EAEFF2;
+  --color-texto: #1F3A5F;
+  --color-texto-suave: #4a6a8a;
+  --color-blanco: #ffffff;
+  --radio-icono: 50%;
+  /* Duración de la rotación del semicírculo:
+     Cambia este valor para hacer la animación
+     más rápida (ej. 0.3s) o más lenta (ej. 0.7s) */
+  --velocidad-rotacion: 0.5s;
+  /* Duración del desplazamiento de la onda:
+     Ajusta para controlar la fluidez del subrayado */
+  --velocidad-onda: 1.5s;
+}
 
-Infografía web interactiva que presenta cinco hallazgos clave de la investigación de Daghustani y MacKenzie (2022) sobre las experiencias de madres con hijos adolescentes autistas en sociedades conservadoras.
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-## Descripción del Proyecto
+/* ============================================
+   TIPOGRAFÍA Y FONDO GENERAL
+   ============================================ */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
 
-Documento HTML único que transforma una lista de cinco puntos en una experiencia visual interactiva mediante dos efectos CSS principales:
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: 1.65;
+  min-height: 100vh;
+  /* Patrón sutil de fondo para dar textura */
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(78,128,152,0.07) 0%, transparent 50%),
+    radial-gradient(circle at 85% 80%, rgba(31,58,95,0.05) 0%, transparent 50%);
+  background-attachment: fixed;
+}
 
-- **Efecto de desplazamiento del ícono (#18):** Cada marcador muestra inicialmente un semicírculo de fondo. Al pasar el cursor sobre el ítem, el segundo semicírculo rota desde una posición oculta hasta completar un círculo completo detrás del emoji.
-- **Línea de menú ondulada (#24):** Al activar el hover, se revela una línea ondulada animada debajo del título del ítem. La onda se desplaza horizontalmente de forma continua usando un SVG codificado en base64 como imagen de fondo.
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+.contenedor-principal {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 1.5rem;
+}
 
-## Estructura HTML
+/* ============================================
+   ENCABEZADO DE LA INFOGRAFÍA
+   ============================================ */
+.encabezado {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 3px solid var(--color-secundario);
+  position: relative;
+}
 
-```
+.encabezado::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: var(--color-primario);
+}
+
+.encabezado h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primario);
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.encabezado p {
+  font-size: 0.95rem;
+  color: var(--color-texto-suave);
+  font-weight: 400;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   LISTA PRINCIPAL — ESTRUCTURA BASE
+   Cada <li> tiene dos columnas internas:
+   - .icono-contenedor (izquierda): número + emoji
+   - .texto-contenedor (derecha): título + descripción
+   ============================================ */
+.lista-infografia {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.lista-infografia li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  background-color: var(--color-blanco);
+  border-radius: 14px;
+  padding: 1.5rem;
+  /* Sombra sutil inicial */
+  box-shadow:
+    0 2px 8px rgba(31,58,95,0.06),
+    0 1px 2px rgba(31,58,95,0.04);
+  /* Transición general para todos los estados */
+  transition:
+    transform 0.4s ease-in-out,
+    box-shadow 0.4s ease-in-out;
+  /* Área táctil amplia para dispositivos móviles (mínimo 48px de alto,
+     aquí superamos ese mínimo con el padding) */
+  min-height: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Línea lateral decorativa */
+.lista-infografia li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--color-secundario);
+  border-radius: 0 4px 4px 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.4s ease-in-out;
+}
+
+.lista-infografia li:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 24px rgba(31,58,95,0.12),
+    0 3px 8px rgba(31,58,95,0.08);
+}
+
+.lista-infografia li:hover::before {
+  transform: scaleY(1);
+  transform-origin: top;
+}
+
+/* ============================================
+   EFECTO PRINCIPAL #18: DESPLAZAMIENTO DEL ÍCONO
+   El ícono tiene un semicírculo de fondo visible.
+   Al hacer :hover sobre el <li>, el otro semicírculo
+   se desliza/rota para completar el círculo.
+   
+   Se usa ::before para el semicírculo fijo
+   y ::after para el semicírculo que rota al hover.
+   ============================================ */
+.icono-contenedor {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radio-icono);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+/* Número de posición superpuesto al ícono */
+.icono-contenedor .numero {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--color-primario);
+  color: var(--color-blanco);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-shadow: 0 2px 4px rgba(31,58,95,0.3);
+}
+
+/* Emoji centrado sobre los semicírculos */
+.icono-contenedor .emoji {
+  font-size: 1.65rem;
+  position: relative;
+  z-index: 2;
+  /* Transición suave del emoji al hover */
+  transition: transform var(--velocidad-rotacion) ease-in-out;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+}
+
+/* Semicírculo FIJO (mitad izquierda del fondo circular) */
+.icono-contenedor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background-color: var(--color-secundario);
+  border-radius: 64px 0 0 64px;
+  z-index: 0;
+  transition: background-color var(--velocidad-rotacion) ease-in-out;
+}
+
+/* Semicírculo MÓVIL (mitad derecha, rotado al hover) */
+.icono-contenedor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background-color: var(--color-secundario);
+  border-radius: 0 64px 64px 0;
+  z-index: 0;
+  /* Estado inicial: semicírculo rotado -90deg para que
+     su cara visible quede hacia adentro (oculto) */
+  transform: rotate(-90deg);
+  transform-origin: left center;
+  opacity: 0;
+  transition:
+    transform var(--velocidad-rotacion) ease-in-out,
+    opacity var(--velocidad-rotacion) ease-in-out,
+    background-color var(--velocidad-rotacion) ease-in-out;
+}
+
+/* ============================================
+   ESTADO :hover SOBRE EL ÍTEM
+   El semicírculo móvil rota a 0deg, completando
+   el círculo de fondo del ícono.
+   ============================================ */
+.lista-infografia li:hover .icono-contenedor::after {
+  transform: rotate(0deg);
+  opacity: 1;
+}
+
+.lista-infografia li:hover .icono-contenedor::before {
+  background-color: var(--color-primario);
+}
+
+.lista-infografia li:hover .icono-contenedor::after {
+  background-color: var(--color-primario);
+}
+
+.lista-infografia li:hover .icono-contenedor .emoji {
+  transform: scale(1.15);
+}
+
+/* ============================================
+   COLUMNA DE TEXTO (derecha)
+   ============================================ */
+.texto-contenedor {
+  flex: 1;
+  min-width: 0; /* Evita desbordamiento con texto largo */
+  padding-top: 0.15rem;
+}
+
+.texto-contenedor h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-primario);
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+  transition: color 0.4s ease-in-out;
+  /* Posición relativa para el efecto de onda */
+  position: relative;
+  display: inline-block;
+}
+
+.lista-infografia li:hover .texto-contenedor h2 {
+  color: var(--color-secundario);
+}
+
+.texto-contenedor p {
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+  line-height: 1.65;
+  transition: color 0.4s ease-in-out;
+}
+
+.lista-infografia li:hover .texto-contenedor p {
+  color: var(--color-texto);
+}
+
+/* ============================================
+   EFECTO SECUNDARIO #24: LÍNEA DE MENÚ ONDULADA
+   Se revela una línea ondulada debajo del título
+   al hacer :hover, usando un SVG codificado en
+   base64 como background-image.
+   
+   ★ PARA CAMBIAR EL SVG DE LA ONDA:
+     Reemplaza la cadena después de
+     "data:image/svg+xml;base64," con el
+     base64 de tu propio SVG ondulado.
+     Puedes generar tu SVG en Illustrator,
+     Inkscape o herramientas online como
+     https://svgomg.net/, luego convertirlo
+     a base64 en https://www.base64encode.org/
+     
+     El SVG actual es una onda sinusoidal simple
+     con 4 ciclos, altura de 6px y ancho de 200px.
+   ============================================ */
+
+/* Línea ondulada como pseudo-elemento ::after del h2 */
+.texto-contenedor h2::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  /* ★ SVG EN BASE64 DE LA ONDA — REEMPLAZAR AQUÍ ★
+     Este SVG contiene una onda sinusoidal con 4 ciclos.
+     Sustituye toda la cadena base64 por la de tu propio SVG. */
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDIwMCA2IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMCAzUTI1IDAgNTAgM1QxMDAgM1QxNTAgM1QyMDAgMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNEU4MDk4IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==");
+  background-repeat: repeat-x;
+  background-size: 200px 6px;
+  background-position: 0 0;
+  /* Estado inicial: invisible */
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition:
+    opacity 0.4s ease-in-out,
+    transform 0.4s ease-in-out;
+}
+
+/* Revelar la onda al hover del ítem padre */
+.lista-infografia li:hover .texto-contenedor h2::after {
+  opacity: 1;
+  transform: scaleX(1);
+  /* Activar la animación de desplazamiento horizontal */
+  animation: onda-deslizante var(--velocidad-onda) linear infinite;
+}
+
+/* ============================================
+   ANIMACIÓN @keyframes PARA LA ONDA
+   Mueve la posición del fondo para que la onda
+   parezca desplazarse horizontalmente.
+   
+   ★ PARA AJUSTAR LA VELOCIDAD DE LA ONDA:
+     Cambia el valor de --velocidad-onda en :root
+     (arriba del todo). Valores menores = más rápido.
+     Ejemplo: --velocidad-onda: 0.8s;  (rápido)
+              --velocidad-onda: 3s;    (lento)
+   ============================================ */
+@keyframes onda-deslizante {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    /* Se desplaza un ciclo completo del patrón (200px)
+       para crear un bucle perfecto sin saltos */
+    background-position: 200px 0;
+  }
+}
+
+/* ============================================
+   PIE DE PÁGINA (FOOTER)
+   ============================================ */
+footer {
+  margin-top: 3rem;
+  padding: 1.75rem 1.5rem;
+  background-color: var(--color-primario);
+  border-radius: 14px;
+  text-align: center;
+}
+
+footer p {
+  font-size: 0.8rem;
+  color: rgba(234,239,242,0.8);
+  line-height: 1.7;
+  margin: 0;
+}
+
+footer p + p {
+  margin-top: 0.35rem;
+}
+
+footer a {
+  color: var(--color-secundario);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease-in-out;
+}
+
+footer a:hover {
+  color: var(--color-fondo);
+  text-decoration: underline;
+}
+
+/* Separador decorativo en el footer */
+footer .separador {
+  width: 40px;
+  height: 2px;
+  background-color: var(--color-secundario);
+  margin: 0.75rem auto;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+/* ============================================
+   DISEÑO RESPONSIVO — MOBILE FIRST
+   ============================================ */
+
+/* ----- Tablets (≥ 600px) ----- */
+@media (min-width: 600px) {
+  .contenedor-principal {
+    padding: 3.5rem 2rem 2rem;
+  }
+
+  .encabezado h1 {
+    font-size: 2.1rem;
+  }
+
+  .encabezado p {
+    font-size: 1rem;
+  }
+
+  .lista-infografia li {
+    padding: 1.75rem 2rem;
+    gap: 1.5rem;
+  }
+
+  .icono-contenedor {
+    width: 72px;
+    height: 72px;
+  }
+
+  /* Ajustar el border-radius de los semicírculos al nuevo tamaño */
+  .icono-contenedor::before {
+    border-radius: 72px 0 0 72px;
+  }
+
+  .icono-contenedor::after {
+    border-radius: 0 72px 72px 0;
+  }
+
+  .icono-contenedor .emoji {
+    font-size: 1.85rem;
+  }
+
+  .texto-contenedor h2 {
+    font-size: 1.15rem;
+  }
+
+  .texto-contenedor p {
+    font-size: 0.95rem;
+  }
+}
+
+/* ----- Escritorio (≥ 900px) ----- */
+@media (min-width: 900px) {
+  .contenedor-principal {
+    padding: 4.5rem 2.5rem 2.5rem;
+  }
+
+  .encabezado {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.25rem;
+  }
+
+  .encabezado h1 {
+    font-size: 2.35rem;
+  }
+
+  .lista-infografia {
+    gap: 1.75rem;
+  }
+
+  .lista-infografia li {
+    padding: 2rem 2.25rem;
+  }
+
+  .texto-contenedor h2 {
+    font-size: 1.2rem;
+  }
+
+  .texto-contenedor h2::after {
+    bottom: -8px;
+    height: 7px;
+    background-size: 200px 7px;
+  }
+
+  footer {
+    margin-top: 3.5rem;
+    padding: 2rem 2.5rem;
+  }
+}
+
+/* ----- Pantallas pequeñas (≤ 400px) ----- */
+@media (max-width: 400px) {
+  .contenedor-principal {
+    padding: 1.5rem 0.85rem 1rem;
+  }
+
+  .encabezado h1 {
+    font-size: 1.35rem;
+  }
+
+  .lista-infografia li {
+    padding: 1.15rem 1rem;
+    gap: 1rem;
+    border-radius: 10px;
+  }
+
+  .icono-contenedor {
+    width: 52px;
+    height: 52px;
+  }
+
+  .icono-contenedor::before {
+    border-radius: 52px 0 0 52px;
+  }
+
+  .icono-contenedor::after {
+    border-radius: 0 52px 52px 0;
+  }
+
+  .icono-contenedor .emoji {
+    font-size: 1.35rem;
+  }
+
+  .icono-contenedor .numero {
+    width: 19px;
+    height: 19px;
+    font-size: 0.6rem;
+    top: -5px;
+    right: -5px;
+  }
+
+  .texto-contenedor h2 {
+    font-size: 0.95rem;
+  }
+
+  .texto-contenedor p {
+    font-size: 0.83rem;
+  }
+
+  .texto-contenedor h2::after {
+    height: 4px;
+    bottom: -4px;
+    background-size: 200px 4px;
+  }
+}
+
+/* ============================================
+   PREFERENCIA DE MOVIMIENTO REDUCIDO
+   Respeta la configuración de accesibilidad
+   del usuario para reducir animaciones.
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
 <body>
-  <main class="contenedor-principal">
-    <header class="encabezado">        ← Título y subtítulo
-    <ol class="lista-infografia">       ← Lista semántica ordenada
-      <li>                              ← Cada ítem con dos columnas
-        <div class="icono-contenedor">  ← Columna izquierda: número + emoji
-        <div class="texto-contenedor">  ← Columna derecha: título + descripción
-      </li>
-      × 5
-    </ol>
-    <footer>                            ← Fuente y autoría
-  </main>
+
+<main class="contenedor-principal">
+
+  <header class="encabezado">
+    <h1>Cinco hallazgos clave sobre la experiencia de madres con hijos adolescentes autistas</h1>
+    <p>Resultados de investigación cualitativa en Arabia Saudita y Baréin — Daghustani y MacKenzie, 2022</p>
+  </header>
+
+  <ol class="lista-infografia">
+
+    <li>
+      <div class="icono-contenedor" aria-hidden="true">
+        <span class="numero">1</span>
+        <span class="emoji">🧩</span>
+      </div>
+      <div class="texto-contenedor">
+        <h2>Doble estigma y aislamiento social</h2>
+        <p>En sociedades conservadoras como Arabia Saudita y Baréin, la discapacidad y la sexualidad son temas fuertemente estigmatizados. Esta combinación provoca un aislamiento severo para las familias, limitando su interacción social por miedo al juicio, la culpa y la crítica comunitaria.</p>
+      </div>
+    </li>
+
+    <li>
+      <div class="icono-contenedor" aria-hidden="true">
+        <span class="numero">2</span>
+        <span class="emoji">⚖️</span>
+      </div>
+      <div class="texto-contenedor">
+        <h2>Carga de cuidado desproporcionada sobre las madres</h2>
+        <p>El trabajo de dependencia y cuidado recae casi de forma exclusiva en las mujeres. Esta desigualdad de género no remunerada genera agotamiento físico y mental en las madres, quienes suelen dejar de lado su propio bienestar, desarrollo profesional e intereses personales.</p>
+      </div>
+    </li>
+
+    <li>
+      <div class="icono-contenedor" aria-hidden="true">
+        <span class="numero">3</span>
+        <span class="emoji">🚫</span>
+      </div>
+      <div class="texto-contenedor">
+        <h2>Comportamientos sexuales sin comprensión de normas</h2>
+        <p>La adolescencia trae consigo comportamientos sexuales naturales (como la masturbación o la excitación), pero los jóvenes autistas del estudio a menudo no comprenden los cambios de su cuerpo ni las reglas de privacidad y consentimiento, resultando en conductas inapropiadas en público o hacia familiares.</p>
+      </div>
+    </li>
+
+    <li>
+      <div class="icono-contenedor" aria-hidden="true">
+        <span class="numero">4</span>
+        <span class="emoji">📚</span>
+      </div>
+      <div class="texto-contenedor">
+        <h2>Ausencia crítica de educación sexual institucional</h2>
+        <p>No existe educación sexual formal en los colegios ni centros de autismo de la región. Esto deja a las madres solas frente a la responsabilidad de educar sexualmente a sus hijos, muchas veces sin herramientas pedagógicas adecuadas y lidiando con sus propias vergüenzas culturales.</p>
+      </div>
+    </li>
+
+    <li>
+      <div class="icono-contenedor" aria-hidden="true">
+        <span class="numero">5</span>
+        <span class="emoji">🔄</span>
+      </div>
+      <div class="texto-contenedor">
+        <h2>Divergencia en las estrategias de manejo materno</h2>
+        <p>Frente a los comportamientos sexuales, las madres reaccionan de dos formas opuestas: un grupo intenta suprimir o redirigir la conducta (interrumpiéndola o usando duchas frías), mientras que otro grupo opta por la aceptación, educando activamente sobre el significado de la pubertad y la importancia de la privacidad.</p>
+      </div>
+    </li>
+
+  </ol>
+
+  <footer>
+    <p>Fuente: <a href="https://doi.org/10.1016/j.ijedro.2022.100215" target="_blank" rel="noopener noreferrer">International Journal of Educational Research Open</a> — DOI: <a href="https://doi.org/10.1016/j.ijedro.2022.100215" target="_blank" rel="noopener noreferrer">10.1016/j.ijedro.2022.100215</a></p>
+    <div class="separador" aria-hidden="true"></div>
+    <p>Diseñado por: Alejandro Nuñez</p>
+  </footer>
+
+</main>
+
 </body>
-```
-
-Se utilizó `<ol>` en lugar de `<ul>` por tratarse de una secuencia numerada con jerarquía temática. Los números visuales se implementan manualmente mediante `<span class="numero">` para mantener control total sobre su posicionamiento dentro del ícono circular, independientemente del estilo nativo del contador de la lista.
-
-## Arquitectura CSS
-
-### Variables personalizadas (`:root`)
-
-Todas las decisiones de color, ritmo de animación y dimensiones se centralizan en variables CSS para facilitar la personalización:
-
-| Variable | Valor por defecto | Función |
-|---|---|---|
-| `--color-primario` | `#1F3A5F` | Color oscuro para textos, números y fondo del ícono al hover |
-| `--color-secundario` | `#4E8098` | Color medio para semicírculos iniciales, onda y acentos |
-| `--color-fondo` | `#EAEFF2` | Fondo general del documento |
-| `--velocidad-rotacion` | `0.5s` | Duración de la rotación del semicírculo móvil |
-| `--velocidad-onda` | `1.5s` | Duración de un ciclo completo de desplazamiento de la onda |
-
-### Efecto del ícono (semicírculos)
-
-El fondo circular del ícono se construye sin elementos adicionales en el HTML, usando únicamente pseudoelementos sobre `.icono-contenedor`:
-
-- `::before` — Semicírculo fijo (mitad izquierda), siempre visible con `--color-secundario`.
-- `::after` — Semicírculo móvil (mitad derecha), inicialmente rotado `-90deg` con `opacity: 0`. Al hacer `:hover` sobre el `<li>` padre, se transforma a `rotate(0deg)` con `opacity: 1`.
-
-Ambos cambian a `--color-primario` durante el hover para generar un contraste de color que refuerza visualmente el estado activo. El emoji escala a `1.15` simultáneamente.
-
-### Efecto de la onda (SVG base64)
-
-La línea ondulada es un `<path>` SVG sinusoidal de 4 ciclos codificado en base64, aplicado como `background-image` sobre `h2::after`. La animación `@keyframes onda-deslizante` desplaza `background-position` de `0` a `200px` (un ciclo completo del patrón) en bucle infinito, garantizando una transición sin saltos.
-
-La revelación usa `transform: scaleX(0)` → `scaleX(1)` con `transform-origin: left center` para un efecto de "dibujo" desde la izquierda.
-
-### Línea lateral animada
-
-Cada `<li>` tiene un `::before` adicional (línea vertical de 4px a la izquierda) que escala de `scaleY(0)` a `scaleY(1)` al hover, cambiando su `transform-origin` de `bottom` a `top` para crear un efecto de "crecimiento hacia arriba".
-
-## Estrategia Responsive (Mobile First)
-
-El CSS se escribe desde el breakpoint más pequeño y se amplía progresivamente:
-
-| Breakpoint | Dispositivo objetivo | Ajustes principales |
-|---|---|---|
-| Base (0px) | Móvil | Ícono de 64px, padding compacto, tipografía reducida |
-| `≤ 400px` | Móvil pequeño | Ícono de 52px, padding mínimo, onda de 4px de altura |
-| `≥ 600px` | Tablet | Ícono de 72px, más espaciado, tipografía amplificada |
-| `≥ 900px` | Escritorio | Máximo espaciado, onda de 7px, footer expandido |
-
-El área táctil de cada ítem supera los 48px de alto en todos los breakpoints, cumpliendo con las pautas de accesibilidad WCAG para objetivos táctiles.
-
-## Personalización
-
-### Cambiar la onda ondulada
-
-1. Diseña tu SVG ondulado (ancho sugerido: 200px, altura: 6–7px).
-2. Codifícalo a base64 usando cualquier herramienta online.
-3. Reemplaza la cadena dentro de `url("data:image/svg+xml;base64,...")` en la regla `.texto-contenedor h2::after`.
-4. Ajusta `background-size` para que coincida con las dimensiones de tu SVG.
-5. Ajusta el valor final de `background-position` en `@keyframes onda-deslizante` para que coincida con el ancho de tu patrón.
-
-### Cambiar colores
-
-Modifica las tres variables de color en `:root`. Los colores se aplican de forma cascada a todos los elementos: fondo, textos, sombras, íconos, onda y pie de página.
-
-### Cambiar velocidad de animaciones
-
-- Rotación del ícono: modifica `--velocidad-rotacion` (valores entre `0.3s` y `0.8s` recomendados).
-- Desplazamiento de la onda: modifica `--velocidad-onda` (valores entre `0.8s` y `3s` recomendados).
-
-### Cambiar íconos o emojis
-
-Sustituye el texto dentro de cada `<span class="emoji">` por cualquier otro emoji o caracter Unicode. No es necesario ajustar CSS.
-
-## Contenido
-
-Los cinco puntos representan hallazgos del artículo:
-
-> Daghustani, W., y MacKenzie, A. (2022). Stigma, gendered care work and sex education: Mothers' experiences of raising autistic adolescents sons in socially conservative societies. *International Journal of Educational Research Open*, 3, 100215. https://doi.org/10.1016/j.ijedro.2022.100215
-
-## Restricciones técnicas cumplidas
-
-- HTML semántico sin atributos de presentación.
-- CSS puro (Vanilla CSS) sin preprocesadores, frameworks ni JavaScript.
-- Transiciones unificadas con `transition: ... 0.4s ease-in-out`.
-- Respeta `prefers-reduced-motion: reduce` desactivando animaciones y transiciones.
-- Documento HTML único, autocontenido, sin dependencias externas.
-
-## Uso
-
-Abrir el archivo `.html` directamente en cualquier navegador moderno. No requiere servidor, compilación ni conexión a internet.
-```
+</html>
