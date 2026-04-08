@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía Interactiva — ************ de Madres</title>
+    <style>
+        /* ============================================
+   VARIABLES Y RESET GLOBAL
+   ============================================ */
+        :root {
+            --color-primario: #1F3A5F;
+            --color-secundario: #4E8098;
+            --color-fondo: #EAEFF2;
+            --color-texto: #1F3A5F;
+            --color-texto-suave: #4a6a8a;
+            --color-blanco: #ffffff;
+            --radio-icono: 50%;
+            /* Duración de la rotación del semicírculo:
+     Cambia este valor para hacer la animación
+     más rápida (ej. 0.3s) o más lenta (ej. 0.7s) */
+            --velocidad-rotacion: 0.5s;
+            /* Duración del desplazamiento de la onda:
+     Ajusta para controlar la fluidez del subrayado */
+            --velocidad-onda: 1.5s;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ============================================
+   TIPOGRAFÍA Y FONDO GENERAL
+   ============================================ */
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+            line-height: 1.65;
+            min-height: 100vh;
+            /* Patrón sutil de fondo para dar textura */
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(78, 128, 152, 0.07) 0%, transparent 50%),
+                radial-gradient(circle at 85% 80%, rgba(31, 58, 95, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+        .contenedor-principal {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 2.5rem 1.25rem 1.5rem;
+        }
+
+        /* ============================================
+   ENCABEZADO DE LA INFOGRAFÍA
+   ============================================ */
+        .encabezado {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid var(--color-secundario);
+            position: relative;
+        }
+
+        .encabezado::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--color-primario);
+        }
+
+        .encabezado h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--color-primario);
+            line-height: 1.3;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .encabezado p {
+            font-size: 0.95rem;
+            color: var(--color-texto-suave);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+   LISTA PRINCIPAL — ESTRUCTURA BASE
+   Cada <li> tiene dos columnas internas:
+   - .icono-contenedor (izquierda): número + emoji
+   - .texto-contenedor (derecha): título + descripción
+   ============================================ */
+        .lista-infografia {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .lista-infografia li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            background-color: var(--color-blanco);
+            border-radius: 14px;
+            padding: 1.5rem;
+            /* Sombra sutil inicial */
+            box-shadow:
+                0 2px 8px rgba(31, 58, 95, 0.06),
+                0 1px 2px rgba(31, 58, 95, 0.04);
+            /* Transición general para todos los estados */
+            transition:
+                transform 0.4s ease-in-out,
+                box-shadow 0.4s ease-in-out;
+            /* Área táctil amplia para dispositivos móviles (mínimo 48px de alto,
+     aquí superamos ese mínimo con el padding) */
+            min-height: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Línea lateral decorativa */
+        .lista-infografia li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--color-secundario);
+            border-radius: 0 4px 4px 0;
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .lista-infografia li:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 8px 24px rgba(31, 58, 95, 0.12),
+                0 3px 8px rgba(31, 58, 95, 0.08);
+        }
+
+        .lista-infografia li:hover::before {
+            transform: scaleY(1);
+            transform-origin: top;
+        }
+
+        /* ============================================
+   EFECTO PRINCIPAL #18: DESPLAZAMIENTO DEL ÍCONO
+   El ícono tiene un semicírculo de fondo visible.
+   Al hacer :hover sobre el <li>, el otro semicírculo
+   se desliza/rota para completar el círculo.
+   
+   Se usa ::before para el semicírculo fijo
+   y ::after para el semicírculo que rota al hover.
+   ============================================ */
+        .icono-contenedor {
+            flex-shrink: 0;
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radio-icono);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+        }
+
+        /* Número de posición superpuesto al ícono */
+        .icono-contenedor .numero {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: var(--color-primario);
+            color: var(--color-blanco);
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            box-shadow: 0 2px 4px rgba(31, 58, 95, 0.3);
+        }
+
+        /* Emoji centrado sobre los semicírculos */
+        .icono-contenedor .emoji {
+            font-size: 1.65rem;
+            position: relative;
+            z-index: 2;
+            /* Transición suave del emoji al hover */
+            transition: transform var(--velocidad-rotacion) ease-in-out;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Semicírculo FIJO (mitad izquierda del fondo circular) */
+        .icono-contenedor::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background-color: var(--color-secundario);
+            border-radius: 64px 0 0 64px;
+            z-index: 0;
+            transition: background-color var(--velocidad-rotacion) ease-in-out;
+        }
+
+        /* Semicírculo MÓVIL (mitad derecha, rotado al hover) */
+        .icono-contenedor::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background-color: var(--color-secundario);
+            border-radius: 0 64px 64px 0;
+            z-index: 0;
+            /* Estado inicial: semicírculo rotado -90deg para que
+     su cara visible quede hacia adentro (oculto) */
+            transform: rotate(-90deg);
+            transform-origin: left center;
+            opacity: 0;
+            transition:
+                transform var(--velocidad-rotacion) ease-in-out,
+                opacity var(--velocidad-rotacion) ease-in-out,
+                background-color var(--velocidad-rotacion) ease-in-out;
+        }
+
+        /* ============================================
+   ESTADO :hover SOBRE EL ÍTEM
+   El semicírculo móvil rota a 0deg, completando
+   el círculo de fondo del ícono.
+   ============================================ */
+        .lista-infografia li:hover .icono-contenedor::after {
+            transform: rotate(0deg);
+            opacity: 1;
+        }
+
+        .lista-infografia li:hover .icono-contenedor::before {
+            background-color: var(--color-primario);
+        }
+
+        .lista-infografia li:hover .icono-contenedor::after {
+            background-color: var(--color-primario);
+        }
+
+        .lista-infografia li:hover .icono-contenedor .emoji {
+            transform: scale(1.15);
+        }
+
+        /* ============================================
+   COLUMNA DE TEXTO (derecha)
+   ============================================ */
+        .texto-contenedor {
+            flex: 1;
+            min-width: 0;
+            /* Evita desbordamiento con texto largo */
+            padding-top: 0.15rem;
+        }
+
+        .texto-contenedor h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--color-primario);
+            margin-bottom: 0.5rem;
+            line-height: 1.35;
+            transition: color 0.4s ease-in-out;
+            /* Posición relativa para el efecto de onda */
+            position: relative;
+            display: inline-block;
+        }
+
+        .lista-infografia li:hover .texto-contenedor h2 {
+            color: var(--color-secundario);
+        }
+
+        .texto-contenedor p {
+            font-size: 0.9rem;
+            color: var(--color-texto-suave);
+            line-height: 1.65;
+            transition: color 0.4s ease-in-out;
+        }
+
+        .lista-infografia li:hover .texto-contenedor p {
+            color: var(--color-texto);
+        }
+
+        /* ============================================
+   EFECTO SECUNDARIO #24: LÍNEA DE MENÚ ONDULADA
+   Se revela una línea ondulada debajo del título
+   al hacer :hover, usando un SVG codificado en
+   base64 como background-image.
+   
+   ★ PARA CAMBIAR EL SVG DE LA ONDA:
+     Reemplaza la cadena después de
+     "data:image/svg+xml;base64," con el
+     base64 de tu propio SVG ondulado.
+     Puedes generar tu SVG en Illustrator,
+     Inkscape o herramientas online como
+     https://svgomg.net/, luego convertirlo
+     a base64 en https://www.base64encode.org/
+     
+     El SVG actual es una onda sinusoidal simple
+     con 4 ciclos, altura de 6px y ancho de 200px.
+   ============================================ */
+        /* Línea ondulada como pseudo-elemento ::after del h2 */
+        .texto-contenedor h2::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            /* ★ SVG EN BASE64 DE LA ONDA — REEMPLAZAR AQUÍ ★
+     Este SVG contiene una onda sinusoidal con 4 ciclos.
+     Sustituye toda la cadena base64 por la de tu propio SVG. */
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDIwMCA2IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMCAzUTI1IDAgNTAgM1QxMDAgM1QxNTAgM1QyMDAgMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNEU4MDk4IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==");
+            background-repeat: repeat-x;
+            background-size: 200px 6px;
+            background-position: 0 0;
+            /* Estado inicial: invisible */
+            opacity: 0;
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition:
+                opacity 0.4s ease-in-out,
+                transform 0.4s ease-in-out;
+        }
+
+        /* Revelar la onda al hover del ítem padre */
+        .lista-infografia li:hover .texto-contenedor h2::after {
+            opacity: 1;
+            transform: scaleX(1);
+            /* Activar la animación de desplazamiento horizontal */
+            animation: onda-deslizante var(--velocidad-onda) linear infinite;
+        }
+
+        /* ============================================
+   ANIMACIÓN @keyframes PARA LA ONDA
+   Mueve la posición del fondo para que la onda
+   parezca desplazarse horizontalmente.
+   
+   ★ PARA AJUSTAR LA VELOCIDAD DE LA ONDA:
+     Cambia el valor de --velocidad-onda en :root
+     (arriba del todo). Valores menores = más rápido.
+     Ejemplo: --velocidad-onda: 0.8s;  (rápido)
+              --velocidad-onda: 3s;    (lento)
+   ============================================ */
+        @keyframes onda-deslizante {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                /* Se desplaza un ciclo completo del patrón (200px)
+       para crear un bucle perfecto sin saltos */
+                background-position: 200px 0;
+            }
+        }
+
+        /* ============================================
+   PIE DE PÁGINA (FOOTER)
+   ============================================ */
+        footer {
+            margin-top: 3rem;
+            padding: 1.75rem 1.5rem;
+            background-color: var(--color-primario);
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.8rem;
+            color: rgba(234, 239, 242, 0.8);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        footer p+p {
+            margin-top: 0.35rem;
+        }
+
+        footer a {
+            color: var(--color-secundario);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease-in-out;
+        }
+
+        footer a:hover {
+            color: var(--color-fondo);
+            text-decoration: underline;
+        }
+
+        /* Separador decorativo en el footer */
+        footer .separador {
+            width: 40px;
+            height: 2px;
+            background-color: var(--color-secundario);
+            margin: 0.75rem auto;
+            border-radius: 2px;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+   DISEÑO RESPONSIVO — MOBILE FIRST
+   ============================================ */
+        /* ----- Tablets (≥ 600px) ----- */
+        @media (min-width: 600px) {
+            .contenedor-principal {
+                padding: 3.5rem 2rem 2rem;
+            }
+
+            .encabezado h1 {
+                font-size: 2.1rem;
+            }
+
+            .encabezado p {
+                font-size: 1rem;
+            }
+
+            .lista-infografia li {
+                padding: 1.75rem 2rem;
+                gap: 1.5rem;
+            }
+
+            .icono-contenedor {
+                width: 72px;
+                height: 72px;
+            }
+
+            /* Ajustar el border-radius de los semicírculos al nuevo tamaño */
+            .icono-contenedor::before {
+                border-radius: 72px 0 0 72px;
+            }
+
+            .icono-contenedor::after {
+                border-radius: 0 72px 72px 0;
+            }
+
+            .icono-contenedor .emoji {
+                font-size: 1.85rem;
+            }
+
+            .texto-contenedor h2 {
+                font-size: 1.15rem;
+            }
+
+            .texto-contenedor p {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* ----- Escritorio (≥ 900px) ----- */
+        @media (min-width: 900px) {
+            .contenedor-principal {
+                padding: 4.5rem 2.5rem 2.5rem;
+            }
+
+            .encabezado {
+                margin-bottom: 3.5rem;
+                padding-bottom: 2.25rem;
+            }
+
+            .encabezado h1 {
+                font-size: 2.35rem;
+            }
+
+            .lista-infografia {
+                gap: 1.75rem;
+            }
+
+            .lista-infografia li {
+                padding: 2rem 2.25rem;
+            }
+
+            .texto-contenedor h2 {
+                font-size: 1.2rem;
+            }
+
+            .texto-contenedor h2::after {
+                bottom: -8px;
+                height: 7px;
+                background-size: 200px 7px;
+            }
+
+            footer {
+                margin-top: 3.5rem;
+                padding: 2rem 2.5rem;
+            }
+        }
+
+        /* ----- Pantallas pequeñas (≤ 400px) ----- */
+        @media (max-width: 400px) {
+            .contenedor-principal {
+                padding: 1.5rem 0.85rem 1rem;
+            }
+
+            .encabezado h1 {
+                font-size: 1.35rem;
+            }
+
+            .lista-infografia li {
+                padding: 1.15rem 1rem;
+                gap: 1rem;
+                border-radius: 10px;
+            }
+
+            .icono-contenedor {
+                width: 52px;
+                height: 52px;
+            }
+
+            .icono-contenedor::before {
+                border-radius: 52px 0 0 52px;
+            }
+
+            .icono-contenedor::after {
+                border-radius: 0 52px 52px 0;
+            }
+
+            .icono-contenedor .emoji {
+                font-size: 1.35rem;
+            }
+
+            .icono-contenedor .numero {
+                width: 19px;
+                height: 19px;
+                font-size: 0.6rem;
+                top: -5px;
+                right: -5px;
+            }
+
+            .texto-contenedor h2 {
+                font-size: 0.95rem;
+            }
+
+            .texto-contenedor p {
+                font-size: 0.83rem;
+            }
+
+            .texto-contenedor h2::after {
+                height: 4px;
+                bottom: -4px;
+                background-size: 200px 4px;
+            }
+        }
+
+        /* ============================================
+   PREFERENCIA DE MOVIMIENTO REDUCIDO
+   Respeta la configuración de accesibilidad
+   del usuario para reducir animaciones.
+   ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="contenedor-principal">
+        <header class="encabezado">
+            <h1>Cinco hallazgos clave sobre la *********** de ****** con hijos adolescentes autistas</h1>
+            <p>********** de investigaci&oacute;n cualitativa ** Arabia ******* y Bar&eacute;** &mdash; Daghustani y MacKenzie, 2022</p>
+        </header>
+        <ol class="lista-infografia">
+            <li>
+                <div class="icono-contenedor" aria-hidden="true"><span class="numero">1</span> <span class="emoji">🧩</span></div>
+                <div class="texto-contenedor">
+                    <h2>Doble estigma y aislamiento social</h2>
+                    <p>En sociedades ************* **** Arabia Saudita y Bar&eacute;in, ** discapacidad y la ********** son temas *********** estigmatizados. Esta combinaci&oacute;n ******* un aislamiento severo para las familias, limitando su interacci&oacute;n ****** por ***** al juicio, la culpa y la cr&iacute;**** comunitaria.</p>
+                </div>
+            </li>
+            <li>
+                <div class="icono-contenedor" aria-hidden="true"><span class="numero">2</span> <span class="emoji">⚖️</span></div>
+                <div class="texto-contenedor">
+                    <h2>Carga de cuidado **************** ***** las madres</h2>
+                    <p>El trabajo de dependencia y ******* recae casi de forma exclusiva ** las mujeres. **** desigualdad de g&eacute;nero no remunerada genera agotamiento f&iacute;sico y mental en las madres, quienes suelen ***** de lado su propio bienestar, desarrollo profesional e ********* personales.</p>
+                </div>
+            </li>
+            <li>
+                <div class="icono-contenedor" aria-hidden="true"><span class="numero">3</span> <span class="emoji">🚫</span></div>
+                <div class="texto-contenedor">
+                    <h2>Comportamientos ******** sin comprensi&oacute;n de normas</h2>
+                    <p>La adolescencia trae consigo comportamientos sexuales naturales (como ** masturbaci&oacute;n o ** excitaci&oacute;n), pero los j&oacute;***** ******** del estudio a menudo ** comprenden *** cambios de su cuerpo ni las reglas de privacidad y consentimiento, resultando ** conductas inapropiadas en p&uacute;***** o hacia familiares.</p>
+                </div>
+            </li>
+            <li>
+                <div class="icono-contenedor" aria-hidden="true"><span class="numero">4</span> <span class="emoji">📚</span></div>
+                <div class="texto-contenedor">
+                    <h2>Ausencia cr&iacute;**** de educaci&oacute;n sexual institucional</h2>
+                    <p>No existe educaci&oacute;n sexual ****** en los ******** ni ******* ** ******* ** la regi&oacute;n. Esto deja a *** madres solas frente a ** responsabilidad de educar *********** a sus hijos, muchas veces *** ************ pedag&oacute;***** adecuadas y lidiando con sus propias verg&uuml;enzas culturales.</p>
+                </div>
+            </li>
+            <li>
+                <div class="icono-contenedor" aria-hidden="true"><span class="numero">5</span> <span class="emoji">🔄</span></div>
+                <div class="texto-contenedor">
+                    <h2>*********** en las estrategias ** manejo materno</h2>
+                    <p>Frente a los comportamientos sexuales, las madres reaccionan de dos formas opuestas: un ***** intenta suprimir o redirigir la conducta (interrumpi&eacute;***** o usando duchas fr&iacute;as), mientras que otro grupo opta *** la aceptaci&oacute;n, educando activamente ***** el significado de ** pubertad y la importancia de la privacidad.</p>
+                </div>
+            </li>
+        </ol>
+        <footer>
+            <p>Fuente: <a href="https://doi.org/10.1016/j.ijedro.2022.100215" target="_blank" rel="noopener noreferrer">************* Journal of *********** Research Open</a> &mdash; DOI: <a href="https://doi.org/10.1016/j.ijedro.2022.100215" target="_blank" rel="noopener noreferrer">10.1016/j.ijedro.2022.100215</a></p>
+            <div class="separador" aria-hidden="true"><br></div>
+            <p>Dise&ntilde;ado por: Alejandro Nu&ntilde;ez</p>
+        </footer>
+    </main>
+
+<div style="color: red">Prueba de Word a HTML - por favor <a href="https://wordtohtml.net/site/payment">Go PRO</a> para obtener el HTML completo.</div>
+</body>
+
+</html>
